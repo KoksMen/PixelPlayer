@@ -563,4 +563,31 @@
     <string name="ai_state_daily_mix_updated">Daily Mix updated with AI</string>
     <string name="ai_state_could_not_update">Could not update: %s</string>
     <string name="ai_state_no_songs_for_mix">AI couldn\'t find songs for this mix</string>
+    <!-- Feature: Hide, Ignore, Speed, Trim -->
+    <string name="song_info_action_hide">Hide</string>
+    <string name="song_info_action_unhide">Unhide</string>
+    <string name="song_info_action_playback_ignore">Skip</string>
+    <string name="song_info_action_playback_ignore_desc">Automatically skip this track in queue and shuffle</string>
+    <string name="song_info_action_speed">Track speed</string>
+    <string name="song_info_action_speed_desc">Set custom playback speed for this track</string>
+    <string name="song_info_action_trim">Trim audio</string>
+    <string name="song_info_action_trim_desc">Cut a portion of this audio track</string>
+    <string name="trim_audio_title">Trim Audio</string>
+    <string name="trim_audio_start">Start</string>
+    <string name="trim_audio_end">End</string>
+    <string name="trim_audio_duration">Selected</string>
+    <string name="trim_audio_save">Save</string>
+    <string name="trim_audio_set_ringtone">Set as ringtone</string>
+    <string name="trim_audio_success">Audio successfully trimmed and saved</string>
+    <string name="trim_audio_error">Failed to trim audio: %1$s</string>
+    <string name="settings_hidden_songs_title">Hidden tracks</string>
+    <string name="settings_hidden_songs_subtitle">Manage tracks hidden from your library</string>
+    <string name="settings_hidden_songs_empty">No hidden tracks</string>
+    <string name="settings_hidden_songs_unhide_all">Unhide all</string>
+    <string name="settings_ignored_songs_title">Ignored in playback</string>
+    <string name="settings_ignored_songs_subtitle">Tracks skipped automatically during playback</string>
+    <string name="settings_ignored_songs_empty">No ignored tracks</string>
+    <string name="settings_ignored_songs_clear_all">Clear all</string>
+    <string name="song_hidden_toast">Track hidden from library</string>
+    <string name="song_unhidden_toast">Track restored to library</string>
 </resources>

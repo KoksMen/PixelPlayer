@@ -694,9 +694,20 @@ class PlaybackDispatchStateHolder @Inject constructor(
         }
     }
 
+    private var preparingSongTimeoutJob: Job? = null
+
     private fun setPreparingSong(songId: String?) {
+        preparingSongTimeoutJob?.cancel()
         cb.updateUiState { state ->
             if (state.preparingSongId == songId) state else state.copy(preparingSongId = songId)
+        }
+        if (songId != null) {
+            preparingSongTimeoutJob = cb.scope.launch {
+                delay(8000L) // Safety timeout: auto-clear preparing state after 8 seconds
+                cb.updateUiState { state ->
+                    if (state.preparingSongId == songId) state.copy(preparingSongId = null) else state
+                }
+            }
         }
     }
 

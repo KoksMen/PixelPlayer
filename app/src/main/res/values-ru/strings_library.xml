@@ -4,7 +4,7 @@
     <string name="library_screen_title">Библиотека</string>
     <string name="library_tabs_sheet_title">Вкладки библиотеки</string>
     <string name="library_tabs_sheet_subtitle">Быстро переходите между вкладками и меняйте их порядок.</string>
-    <string name="library_reorder_tabs_label">Изменить порядок вкладок</string>
+    <string name="library_reorder_tabs_label">Порядок вкладок</string>
 
     <!-- Library Tab Names -->
     <string name="library_tab_songs">Песни</string>
@@ -19,12 +19,12 @@
     <string name="library_toast_set_ai_provider_api_key_first">Сначала укажите API-ключ AI-провайдера</string>
     <string name="library_toast_set_gemini_api_key_first">Сначала укажите API-ключ Gemini</string>
     <string name="library_toast_added_to_queue">Добавлено в очередь</string>
-    <string name="library_toast_playing_next">Будет воспроизведено следующим</string>
+    <string name="library_toast_playing_next">Играет следующим</string>
 
     <!-- Library Toolbar & Navigation -->
     <string name="library_cd_watch_transfer">Просмотр передачи</string>
     <string name="library_cd_open_settings">Настройки</string>
-    <string name="library_tab_edit">Изменить</string>
+    <string name="library_tab_edit">Правка</string>
     <string name="library_cd_reorder_tabs">Изменить порядок вкладок</string>
     <string name="library_cd_expand_tab_menu">Развернуть меню</string>
 
@@ -34,12 +34,12 @@
     <string name="library_cd_folder">Папка</string>
 
     <!-- Library Sort & View Bottom Sheet -->
-    <string name="library_sort_by_title">Сортировать по</string>
+    <string name="library_sort_by_title">Сортировка</string>
     <string name="library_sort_section_view">Вид</string>
     <string name="library_sort_toggle_playlist_view">Режим плейлистов</string>
     <string name="library_view_mode_grid">Сетка</string>
     <string name="library_view_mode_list">Список</string>
-    <string name="library_storage_internal">Внутренняя память</string>
+    <string name="library_storage_internal">Память</string>
     <string name="library_storage_sd_card">SD-карта</string>
     <string name="library_storage_sd_card_unavailable">SD-карта сейчас недоступна.</string>
     <string name="library_sort_section_cloud">Облако</string>
@@ -47,7 +47,7 @@
     <string name="library_telegram_topics_display_title">Отображение тем</string>
     <string name="library_telegram_topic_mode_channels">Каналы</string>
     <string name="library_telegram_topic_mode_topics">Темы</string>
-    <string name="library_telegram_topic_mode_both">Оба варианта</string>
+    <string name="library_telegram_topic_mode_both">Оба</string>
     <string name="library_cloud_sources_heading">Облако</string>
     <string name="library_cloud_only_label">Только облако</string>
 
@@ -124,9 +124,9 @@
 
     <!-- SongInfoBottomSheet, MultiSelectionBottomSheet, PlaylistMultiSelectionBottomSheet -->
     <string name="song_info_cd_edit_metadata">Редактировать теги трека</string>
-    <string name="song_info_action_play">Воспроизвести</string>
+    <string name="song_info_action_play">Играть</string>
     <string name="song_info_cd_play">Воспроизвести трек</string>
-    <string name="song_info_action_play_all">Воспроизвести всё</string>
+    <string name="song_info_action_play_all">Играть всё</string>
     <string name="song_info_cd_play_all">Воспроизвести всё</string>
     <string name="song_info_cd_add_to_favorites">Добавить в избранное</string>
     <string name="song_info_cd_add_to_favorites_all">Добавить всё в избранное</string>
@@ -136,9 +136,9 @@
     <string name="song_info_cd_share_song_file">Поделиться аудиофайлом</string>
     <string name="song_info_cd_share_all_as_zip">Поделиться всем как ZIP</string>
     <string name="song_info_error_share_song">Не удалось поделиться треком: %1$s</string>
-    <string name="song_info_action_add_to_queue">Добавить в очередь</string>
+    <string name="song_info_action_add_to_queue">В очередь</string>
     <string name="song_info_cd_add_to_queue">Добавить в очередь</string>
-    <string name="song_info_action_queue_next">Следующий</string>
+    <string name="song_info_action_queue_next">Далее</string>
     <string name="song_info_cd_queue_next">Воспроизвести следующим</string>
     <string name="song_info_cd_add_to_playlist">Добавить в плейлист</string>
     <string name="song_info_action_delete">Удалить</string>
@@ -147,12 +147,12 @@
     <string name="song_info_transferring_percent">Передача %1$d%%</string>
     <string name="song_info_transferring_to_watch">Передача на часы</string>
     <string name="song_info_transfer_in_progress">Передача выполняется</string>
-    <string name="song_info_send_to_watch">Отправить на часы</string>
+    <string name="song_info_send_to_watch">На часы</string>
     <string name="song_info_watch_unavailable">Часы недоступны</string>
     <string name="song_info_cd_send_to_watch">Отправить трек на часы</string>
     <string name="song_info_cd_watch_unavailable">Часы недоступны</string>
-    <string name="song_info_set_sound_as_short">Установить как</string>
-    <string name="song_info_set_sound_as_long">Установить как звук</string>
+    <string name="song_info_set_sound_as_short">Рингтон</string>
+    <string name="song_info_set_sound_as_long">Как рингтон</string>
     <string name="song_info_cd_set_sound_as">Выберите, как использовать этот трек в качестве системного звука</string>
     <string name="song_info_tone_picker_title">Использовать этот трек как</string>
     <string name="song_info_tone_picker_body">Выберите, куда PixelPlayer должен установить этот звук.</string>
@@ -160,11 +160,11 @@
     <string name="song_info_tone_ringtone_subtitle">Входящие вызовы</string>
     <string name="song_info_tone_notification_title">Звук уведомления</string>
     <string name="song_info_tone_notification_subtitle">Сообщения и уведомления приложений</string>
-    <string name="song_info_tone_alarm_title">Звук будильника</string>
+    <string name="song_info_tone_alarm_title">Будильник</string>
     <string name="song_info_tone_alarm_subtitle">Будильники</string>
     <string name="song_info_tone_confirm_title">Подтвердить смену звука</string>
     <string name="song_info_tone_confirm_body">Установить «%1$s» как %2$s?</string>
-    <string name="song_info_tone_confirm_action">Установить звук</string>
+    <string name="song_info_tone_confirm_action">Задать звук</string>
     <string name="song_info_tone_success">«%1$s» установлен как %2$s</string>
     <string name="song_info_tone_ringtone_label">рингтон</string>
     <string name="song_info_tone_notification_label">звук уведомления</string>
@@ -175,15 +175,15 @@
     <string name="song_info_ringtone_local_only">Только локальные треки можно использовать как рингтоны.</string>
     <string name="song_info_ringtone_missing_file">Не удалось подготовить этот аудиофайл для рингтона.</string>
     <string name="song_info_ringtone_failed">Не удалось установить рингтон: %1$s</string>
-    <string name="song_info_tab_options">Параметры</string>
+    <string name="song_info_tab_options">Опции</string>
     <string name="song_info_tab_options_badge">ПАРАМЕТРЫ</string>
-    <string name="song_info_tab_info">Информация</string>
+    <string name="song_info_tab_info">Инфо</string>
     <string name="song_info_tab_info_badge">ИНФО</string>
     <string name="song_info_duration_label">Длительность</string>
     <string name="song_info_genre_label">Жанр</string>
     <string name="song_info_album_label">Альбом</string>
     <string name="song_info_artist_label">Исполнитель</string>
-    <string name="song_info_audio_format_label">Информация о треке</string>
+    <string name="song_info_audio_format_label">Инфо трека</string>
     <string name="song_info_cd_provider">Источник</string>
     <string name="song_info_cd_file">Файл</string>
     <string name="multi_selection_songs_count_upper">%1$d ТРЕКОВ</string>
@@ -563,4 +563,31 @@
     <string name="ai_state_daily_mix_updated">Daily Mix обновлён с помощью AI</string>
     <string name="ai_state_could_not_update">Не удалось обновить: %s</string>
     <string name="ai_state_no_songs_for_mix">AI не смог подобрать треки для этого микса</string>
+    <!-- Feature: Hide, Ignore, Speed, Trim -->
+    <string name="song_info_action_hide">Скрыть</string>
+    <string name="song_info_action_unhide">Вернуть</string>
+    <string name="song_info_action_playback_ignore">Пропуск</string>
+    <string name="song_info_action_playback_ignore_desc">Автоматически пропускать этот трек в очереди и перемешивании</string>
+    <string name="song_info_action_speed">Скорость</string>
+    <string name="song_info_action_speed_desc">Установить скорость воспроизведения для этого аудио</string>
+    <string name="song_info_action_trim">Обрезать</string>
+    <string name="song_info_action_trim_desc">Вырезать фрагмент из этого аудиофайла</string>
+    <string name="trim_audio_title">Обрезка аудио</string>
+    <string name="trim_audio_start">Начало</string>
+    <string name="trim_audio_end">Конец</string>
+    <string name="trim_audio_duration">Выделено</string>
+    <string name="trim_audio_save">Сохранить</string>
+    <string name="trim_audio_set_ringtone">Рингтон</string>
+    <string name="trim_audio_success">Аудио успешно обрезано и сохранено</string>
+    <string name="trim_audio_error">Ошибка при обрезке аудио: %1$s</string>
+    <string name="settings_hidden_songs_title">Скрытые треки</string>
+    <string name="settings_hidden_songs_subtitle">Треки, скрытые из медиатеки</string>
+    <string name="settings_hidden_songs_empty">Нет скрытых</string>
+    <string name="settings_hidden_songs_unhide_all">Вернуть все</string>
+    <string name="settings_ignored_songs_title">Пропускаемые треки</string>
+    <string name="settings_ignored_songs_subtitle">Автоматически пропускаемые треки</string>
+    <string name="settings_ignored_songs_empty">Нет треков</string>
+    <string name="settings_ignored_songs_clear_all">Очистить</string>
+    <string name="song_hidden_toast">Трек скрыт из фонотеки</string>
+    <string name="song_unhidden_toast">Трек восстановлен в фонотеку</string>
 </resources>

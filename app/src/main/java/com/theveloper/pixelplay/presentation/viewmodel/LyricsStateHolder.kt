@@ -11,6 +11,7 @@ import com.theveloper.pixelplay.data.preferences.UserPreferencesRepository
 import com.theveloper.pixelplay.data.repository.LyricsSearchResult
 import com.theveloper.pixelplay.data.repository.MusicRepository
 import com.theveloper.pixelplay.data.repository.NoLyricsFoundException
+import com.theveloper.pixelplay.utils.LogUtils
 import com.theveloper.pixelplay.utils.LyricsImportSecurity
 import com.theveloper.pixelplay.utils.LyricsImportValidationResult
 import com.theveloper.pixelplay.utils.LyricsUtils
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Callback interface for lyrics loading results.
@@ -68,6 +70,7 @@ class LyricsStateHolder @Inject constructor(
     private var scope: CoroutineScope? = null
     private var loadingJob: Job? = null
     private var loadCallback: LyricsLoadCallback? = null
+    private var currentLoadingSongId: String? = null
 
     // Sync offset per song in milliseconds
     private val _currentSongSyncOffset = MutableStateFlow(0)
@@ -122,24 +125,33 @@ class LyricsStateHolder @Inject constructor(
     fun loadLyricsForSong(song: Song, sourcePreference: LyricsSourcePreference) {
         loadingJob?.cancel()
         val targetSongId = song.id
+        currentLoadingSongId = targetSongId
 
         loadingJob = scope?.launch {
-            loadCallback?.onLoadingStarted(targetSongId)
+            try {
+                loadCallback?.onLoadingStarted(targetSongId)
 
-            val fetchedLyrics = try {
-                withContext(Dispatchers.IO) {
-                    musicRepository.getLyrics(
-                        song = song,
-                        sourcePreference = sourcePreference
-                    )
+                val fetchedLyrics = withTimeoutOrNull(6_000L) {
+                    withContext(Dispatchers.IO) {
+                        musicRepository.getLyrics(
+                            song = song,
+                            sourcePreference = sourcePreference
+                        )
+                    }
+                }
+                loadCallback?.onLyricsLoaded(targetSongId, fetchedLyrics)
+                if (currentLoadingSongId == targetSongId) {
+                    currentLoadingSongId = null
                 }
             } catch (cancellation: CancellationException) {
                 throw cancellation
-            } catch (_: Exception) {
-                null
+            } catch (e: Exception) {
+                LogUtils.e(this@LyricsStateHolder, e, "Error loading lyrics for song: $targetSongId")
+                loadCallback?.onLyricsLoaded(targetSongId, null)
+                if (currentLoadingSongId == targetSongId) {
+                    currentLoadingSongId = null
+                }
             }
-
-            loadCallback?.onLyricsLoaded(targetSongId, fetchedLyrics)
         }
     }
 
@@ -148,6 +160,12 @@ class LyricsStateHolder @Inject constructor(
      */
     fun cancelLoading() {
         loadingJob?.cancel()
+        loadingJob = null
+        val songId = currentLoadingSongId
+        if (songId != null) {
+            loadCallback?.onLyricsLoaded(songId, null)
+            currentLoadingSongId = null
+        }
     }
 
     /**

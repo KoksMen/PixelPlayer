@@ -8,6 +8,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import androidx.paging.filter
 import com.theveloper.pixelplay.data.database.MusicDao
 import com.theveloper.pixelplay.data.database.FavoritesDao
 import com.theveloper.pixelplay.data.database.toSong
@@ -466,10 +467,11 @@ class MediaStoreSongRepository @Inject constructor(
     override fun getPaginatedSongs(sortOption: com.theveloper.pixelplay.data.model.SortOption, storageFilter: com.theveloper.pixelplay.data.model.StorageFilter): Flow<PagingData<Song>> {
         return combine(
             userPreferencesRepository.allowedDirectoriesFlow,
-            userPreferencesRepository.blockedDirectoriesFlow
-        ) { allowedDirs, blockedDirs ->
-            allowedDirs to blockedDirs
-        }.flatMapLatest { (allowedDirs, blockedDirs) ->
+            userPreferencesRepository.blockedDirectoriesFlow,
+            userPreferencesRepository.hiddenSongIdsFlow
+        ) { allowedDirs, blockedDirs, hiddenIds ->
+            Triple(allowedDirs, blockedDirs, hiddenIds)
+        }.flatMapLatest { (allowedDirs, blockedDirs, hiddenIds) ->
             kotlinx.coroutines.flow.flow {
                 val (allowedParentDirs, applyDirectoryFilter) =
                     computeAllowedDirs(allowedDirs, blockedDirs)
@@ -486,9 +488,10 @@ class MediaStoreSongRepository @Inject constructor(
                         }
                     ).flow
                 )
-            }.flatMapLatest { it }
-        }.map { pagingData ->
-            pagingData.map { entity -> entity.toSong() }
+            }.flatMapLatest { it }.map { pagingData ->
+                val mapped = pagingData.map { entity -> entity.toSong() }
+                if (hiddenIds.isEmpty()) mapped else mapped.filter { song -> song.id !in hiddenIds }
+            }
         }
     }
 
@@ -499,10 +502,11 @@ class MediaStoreSongRepository @Inject constructor(
     ): Flow<PagingData<Song>> {
         return combine(
             userPreferencesRepository.allowedDirectoriesFlow,
-            userPreferencesRepository.blockedDirectoriesFlow
-        ) { allowedDirs, blockedDirs ->
-            allowedDirs to blockedDirs
-        }.flatMapLatest { (allowedDirs, blockedDirs) ->
+            userPreferencesRepository.blockedDirectoriesFlow,
+            userPreferencesRepository.hiddenSongIdsFlow
+        ) { allowedDirs, blockedDirs, hiddenIds ->
+            Triple(allowedDirs, blockedDirs, hiddenIds)
+        }.flatMapLatest { (allowedDirs, blockedDirs, hiddenIds) ->
             kotlinx.coroutines.flow.flow {
                 val (allowedParentDirs, applyDirectoryFilter) =
                     computeAllowedDirs(allowedDirs, blockedDirs)
@@ -519,9 +523,10 @@ class MediaStoreSongRepository @Inject constructor(
                         }
                     ).flow
                 )
-            }.flatMapLatest { it }
-        }.map { pagingData ->
-            pagingData.map { entity -> entity.toSong().copy(isFavorite = true) }
+            }.flatMapLatest { it }.map { pagingData ->
+                val mapped = pagingData.map { entity -> entity.toSong().copy(isFavorite = true) }
+                if (hiddenIds.isEmpty()) mapped else mapped.filter { song -> song.id !in hiddenIds }
+            }
         }
     }
 

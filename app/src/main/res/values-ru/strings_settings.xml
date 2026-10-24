@@ -11,7 +11,7 @@
     <string name="settings_category_behavior_subtitle">Жесты, тактильный отклик и навигация</string>
     <string name="settings_category_ai_title">Интеграция ИИ (β)</string>
     <string name="settings_category_ai_subtitle">Поставщики ИИ, API-ключи и настройки моделей</string>
-    <string name="settings_category_backup_title">Резервное копирование и восстановление</string>
+    <string name="settings_category_backup_title">Резервные копии</string>
     <string name="settings_category_backup_subtitle">Экспорт и восстановление персональных данных приложения</string>
     <string name="settings_category_developer_title">Параметры разработчика</string>
     <string name="settings_category_developer_subtitle">Экспериментальные функции и отладка</string>
@@ -21,7 +21,7 @@
     <string name="settings_category_device_capabilities_subtitle">Характеристики аудио, кодеки и декодеры</string>
     <string name="settings_category_accounts_title">Аккаунты</string>
     <string name="settings_category_accounts_subtitle">Управление Telegram, Google Drive, NetEase и другими сервисами</string>
-    <string name="settings_category_about_title">О приложении</string>
+    <string name="settings_category_about_title">О программе</string>
     <string name="settings_category_about_subtitle">Информация, версия и благодарности</string>
 
     <!-- Common toggles / labels used in ThemeSelectorItem maps -->
@@ -204,11 +204,11 @@
     <string name="settings_auto_rotate_patterns_title">Автосмена шаблонов</string>
     <string name="settings_auto_rotate_patterns_subtitle">Менять шаблон коллажа при каждом открытии главной страницы.</string>
     <string name="settings_navigation_bar_section">Панель навигации</string>
-    <string name="settings_navbar_style_title">Стиль панели навигации</string>
+    <string name="settings_navbar_style_title">Стиль панели</string>
     <string name="settings_navbar_style_subtitle">Выберите внешний вид панели навигации.</string>
     <string name="settings_navbar_style_default">По умолчанию</string>
     <string name="settings_navbar_style_full_width">На всю ширину</string>
-    <string name="settings_compact_mode_title">Компактный режим</string>
+    <string name="settings_compact_mode_title">Компактный вид</string>
     <string name="settings_compact_mode_subtitle">Показывать только значки и уменьшить высоту панели навигации.</string>
     <string name="settings_navbar_corner_title">Скругление панели навигации</string>
     <string name="settings_navbar_corner_subtitle">Настройте радиус скругления углов панели навигации.</string>

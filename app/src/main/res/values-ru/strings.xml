@@ -17,7 +17,7 @@
     <string name="grant_permission_button">Предоставить доступ</string>
 
     <!-- External Player -->
-    <string name="external_queue_label">Быстрое воспроизведение</string>
+    <string name="external_queue_label">Быстрый пуск</string>
     <string name="external_playback_error">Не удалось открыть аудиофайл.</string>
     <string name="external_action_open_full_player">Открыть полный плеер</string>
 
@@ -76,7 +76,7 @@
     <string name="common_saved">Сохранено!</string>
     <string name="common_selected">Выбрано</string>
     <string name="common_percentage_text">%1$d%%</string>
-    <string name="common_artist">Исполнитель</string>
+    <string name="common_artist">Артист</string>
     <string name="common_select_all">Выбрать всё</string>
     <string name="common_clear">Очистить</string>
     <string name="common_error_unknown">Неизвестная ошибка</string>
@@ -96,24 +96,24 @@
     <string name="common_merge">Объединить</string>
     <string name="common_rename">Переименовать</string>
     <string name="common_create">Создать</string>
-    <string name="common_lyrics">Текст песни</string>
+    <string name="common_lyrics">Текст</string>
     <string name="common_settings">Настройки</string>
-    <string name="common_album_art">Обложка альбома</string>
+    <string name="common_album_art">Обложка</string>
     <string name="common_playlist">Плейлист</string>
     <string name="common_unknown_track">Неизвестный трек</string>
-    <string name="common_unknown_artist">Неизвестный исполнитель</string>
+    <string name="common_unknown_artist">Неизвестный артист</string>
     <string name="common_unknown_album">Неизвестный альбом</string>
     <string name="common_close">Закрыть</string>
     <string name="common_add">Добавить</string>
     <string name="common_remove">Удалить</string>
-    <string name="common_play">Воспроизвести</string>
+    <string name="common_play">Играть</string>
     <string name="common_previous_track">Предыдущий трек</string>
     <string name="common_next_track">Следующий трек</string>
     <string name="common_favorite">Избранное</string>
     <string name="common_pause">Пауза</string>
     <string name="common_repeat">Повтор</string>
     <string name="common_options">Параметры</string>
-    <string name="common_shuffle_play">Случайное воспроизведение</string>
+    <string name="common_shuffle_play">Перемешать</string>
     <string name="common_more_options_for">Дополнительные параметры: %1$s</string>
     <string name="common_expand_menu">Развернуть меню</string>
     <string name="common_next">Далее</string>
@@ -122,7 +122,7 @@
     <string name="common_export_all">Экспортировать всё</string>
     <string name="common_merge_all">Объединить всё</string>
     <string name="common_share_all">Поделиться всем</string>
-    <string name="common_play_album">Воспроизвести альбом</string>
+    <string name="common_play_album">Играть альбом</string>
     <string name="common_shuffle_play_album">Перемешать альбом</string>
     <string name="common_album_art_for_title">Обложка альбома: %1$s</string>
 </resources>

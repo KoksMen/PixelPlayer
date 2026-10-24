@@ -8,7 +8,7 @@
     <string name="equalizer_change_view_mode_cd">Изменить режим отображения</string>
     <string name="equalizer_disable_cd">Отключить эквалайзер</string>
     <string name="equalizer_enable_cd">Включить эквалайзер</string>
-    <string name="equalizer_edit_tab_title">Редактирование</string>
+    <string name="equalizer_edit_tab_title">Правка</string>
     <string name="equalizer_edit_presets_cd">Редактировать пресеты</string>
     <string name="equalizer_custom_preset_cd">Пользовательский пресет</string>
     <string name="equalizer_presets_cd">Пресеты</string>
@@ -22,14 +22,14 @@
     <string name="equalizer_frequency_response">Частотная характеристика</string>
     <string name="equalizer_unit_hz">Гц</string>
     <string name="equalizer_band_bass">Басы</string>
-    <string name="equalizer_band_low_mids">Нижние средние</string>
-    <string name="equalizer_band_high_mids">Верхние средние</string>
-    <string name="equalizer_band_treble">Высокие частоты</string>
+    <string name="equalizer_band_low_mids">Низ-ср</string>
+    <string name="equalizer_band_high_mids">Верх-ср</string>
+    <string name="equalizer_band_treble">Высокие</string>
     <string name="equalizer_band_bass_low">Басы / Низкие</string>
     <string name="equalizer_band_mid_high">Средние / Высокие</string>
     <string name="equalizer_page_n">Страница %1$d</string>
     <string name="equalizer_reset_duration_cd">Сбросить длительность</string>
-    <string name="equalizer_action_save_new">Сохранить как новый</string>
+    <string name="equalizer_action_save_new">Сохранить</string>
 
     <!-- CustomPresetsSheet -->
     <string name="equalizer_presets_saved_title">Сохранённые пресеты</string>

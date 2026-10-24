@@ -196,6 +196,50 @@ class SettingsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
+    val hiddenSongIds: StateFlow<Set<String>> = userPreferencesRepository.hiddenSongIdsFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
+    val playbackIgnoredSongIds: StateFlow<Set<String>> = userPreferencesRepository.playbackIgnoredSongIdsFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
+
+    val hiddenSongs: StateFlow<List<Song>> = combine(
+        musicRepository.getAudioFiles(),
+        hiddenSongIds
+    ) { allSongs, hiddenIds ->
+        allSongs.filter { hiddenIds.contains(it.id) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val playbackIgnoredSongs: StateFlow<List<Song>> = combine(
+        musicRepository.getAudioFiles(),
+        playbackIgnoredSongIds
+    ) { allSongs, ignoredIds ->
+        allSongs.filter { ignoredIds.contains(it.id) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun unhideSong(songId: String) {
+        viewModelScope.launch {
+            userPreferencesRepository.setSongHidden(songId, false)
+        }
+    }
+
+    fun unhideAllSongs() {
+        viewModelScope.launch {
+            userPreferencesRepository.unhideAllSongs()
+        }
+    }
+
+    fun setSongPlaybackIgnored(songId: String, isIgnored: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setSongPlaybackIgnored(songId, isIgnored)
+        }
+    }
+
+    fun clearPlaybackIgnoredSongs() {
+        viewModelScope.launch {
+            userPreferencesRepository.clearPlaybackIgnoredSongIds()
+        }
+    }
+
     // AI Provider State
     val aiProvider: StateFlow<String> = aiPreferencesRepository.aiProvider
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "GEMINI")

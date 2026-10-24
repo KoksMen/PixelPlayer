@@ -118,7 +118,7 @@
         <item quantity="many">%1$d песен • %2$s</item>
         <item quantity="other">%1$d песни • %2$s</item>
     </plurals>
-    <string name="daily_mix_action_play_it">Воспроизвести</string>
+    <string name="daily_mix_action_play_it">Играть</string>
     <string name="daily_mix_cd_ai_playlist_generator">Генератор плейлистов ИИ</string>
 
     <!-- DailyMixMenu -->
@@ -150,7 +150,7 @@
 
     <!-- RecentlyPlayedScreen -->
     <string name="recently_played_title">Недавно прослушанные</string>
-    <string name="recently_played_action_play_latest">Воспроизвести последнее</string>
+    <string name="recently_played_action_play_latest">Играть последнее</string>
     <string name="recently_played_empty_title">Нет недавних прослушиваний за %1$s</string>
     <string name="recently_played_empty_subtitle">Измените период или прослушайте больше песен, чтобы заполнить эту временную шкалу.</string>
     <string name="recently_played_queue_name">Недавно прослушанные</string>
@@ -159,7 +159,7 @@
 
     <!-- StatsOverviewCard -->
     <string name="home_stats_overview_title">Статистика прослушивания</string>
-    <string name="home_stats_overview_total_plays">Всего воспроизведений</string>
+    <string name="home_stats_overview_total_plays">Всего треков</string>
     <string name="home_stats_overview_avg_per_day">Среднее в день</string>
     <string name="home_stats_overview_top_track">Топ-трек</string>
     <string name="home_stats_overview_top_track_line">%1$s • %2$d прослушиваний</string>
@@ -173,7 +173,7 @@
     <string name="stats_range_year_to_date">Текущий год</string>
     <string name="stats_range_all_time">За всё время</string>
     <string name="stats_hero_listening">Прослушивание</string>
-    <string name="stats_hero_plays">Воспроизведения</string>
+    <string name="stats_hero_plays">Треков</string>
     <string name="stats_section_listening_timeline">Хронология прослушивания</string>
     <string name="stats_timeline_metric_listening_time">Время прослушивания</string>
     <string name="stats_timeline_metric_listening_time_desc">Общее время прослушивания за выбранный период.</string>
@@ -199,7 +199,7 @@
     <string name="stats_grouped_by_month">Сгруппировано по месяцам</string>
     <string name="stats_grouped_by_year">Сгруппировано по годам</string>
     <string name="stats_peak_segment">Пиковый период</string>
-    <string name="stats_n_plays">%1$d воспроизведений</string>
+    <string name="stats_n_plays">%1$d треков</string>
     <string name="stats_em_dash">—</string>
     <string name="stats_section_top_categories">Лучшие категории</string>
     <string name="stats_top_categories_subtitle">Сравните, как вы слушаете музыку по жанрам, исполнителям, альбомам и трекам.</string>

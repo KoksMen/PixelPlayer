@@ -23,6 +23,9 @@ import com.theveloper.pixelplay.data.service.wear.WearPhoneTransferSender
 import com.theveloper.pixelplay.shared.WearTransferProgress
 import com.theveloper.pixelplay.utils.AudioMeta
 import com.theveloper.pixelplay.utils.AudioMetaUtils
+import android.os.Environment
+import com.theveloper.pixelplay.data.preferences.UserPreferencesRepository
+import com.theveloper.pixelplay.utils.AudioTrimmer
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
@@ -47,6 +50,7 @@ class SongInfoBottomSheetViewModel @Inject constructor(
     private val wearPhoneTransferSender: WearPhoneTransferSender,
     private val transferStateStore: PhoneWatchTransferStateStore,
     private val musicDao: MusicDao,
+    private val userPreferencesRepository: UserPreferencesRepository,
     @ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
@@ -107,6 +111,102 @@ class SongInfoBottomSheetViewModel @Inject constructor(
     )
 
     val audioMeta: StateFlow<AudioMeta?> = _audioMeta.asStateFlow()
+
+    val hiddenSongIds: StateFlow<Set<String>> = userPreferencesRepository.hiddenSongIdsFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = emptySet(),
+        )
+
+    val playbackIgnoredSongIds: StateFlow<Set<String>> = userPreferencesRepository.playbackIgnoredSongIdsFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = emptySet(),
+        )
+
+    val songPlaybackSpeeds: StateFlow<Map<String, Float>> = userPreferencesRepository.songPlaybackSpeedsFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = emptyMap(),
+        )
+
+    fun setSongHidden(songId: String, isHidden: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setSongHidden(songId, isHidden)
+        }
+    }
+
+    fun setSongPlaybackIgnored(songId: String, isIgnored: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setSongPlaybackIgnored(songId, isIgnored)
+        }
+    }
+
+    fun setSongPlaybackSpeed(songId: String, speed: Float?) {
+        viewModelScope.launch {
+            userPreferencesRepository.setSongPlaybackSpeed(songId, speed)
+        }
+    }
+
+    fun trimSong(
+        song: Song,
+        startMs: Long,
+        endMs: Long,
+        asRingtone: Boolean,
+        onComplete: (Result<File>) -> Unit,
+    ) {
+        viewModelScope.launch {
+            val uri = resolveMediaStoreAudioUri(song)
+                ?: song.path.takeIf { it.isNotBlank() }?.let { path ->
+                    val f = File(path)
+                    if (f.exists()) Uri.fromFile(f) else null
+                }
+                ?: run {
+                    onComplete(Result.failure(IllegalStateException("Cannot resolve audio source URI")))
+                    return@launch
+                }
+
+            val targetDir = Environment.getExternalStoragePublicDirectory(
+                if (asRingtone) Environment.DIRECTORY_RINGTONES else Environment.DIRECTORY_MUSIC
+            ).let { dir ->
+                if (!dir.exists()) dir.mkdirs()
+                if (dir.exists() && dir.canWrite()) dir else appContext.getExternalFilesDir(null) ?: appContext.filesDir
+            }
+
+            val sanitizedTitle = song.title.replace(Regex("[\\\\/:*?\"<>|]"), "_").ifBlank { "audio" }
+            val ext = song.path.substringAfterLast('.', "m4a").ifBlank { "m4a" }
+            var outFile = File(targetDir, "${sanitizedTitle}_trimmed.$ext")
+            var counter = 1
+            while (outFile.exists()) {
+                outFile = File(targetDir, "${sanitizedTitle}_trimmed_$counter.$ext")
+                counter++
+            }
+
+            val trimResult = AudioTrimmer.trimAudio(
+                context = appContext,
+                sourceUri = uri,
+                destinationFile = outFile,
+                startMs = startMs,
+                endMs = endMs,
+            )
+
+            if (trimResult.isSuccess && asRingtone && Settings.System.canWrite(appContext)) {
+                runCatching {
+                    val scannedUri = Uri.fromFile(outFile)
+                    RingtoneManager.setActualDefaultRingtoneUri(
+                        appContext,
+                        RingtoneManager.TYPE_RINGTONE,
+                        scannedUri,
+                    )
+                }
+            }
+
+            onComplete(trimResult)
+        }
+    }
 
     fun loadArtistsForSong(song: Song) {
         val refs = song.artists

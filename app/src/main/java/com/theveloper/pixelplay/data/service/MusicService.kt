@@ -27,6 +27,7 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
+import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
@@ -1416,6 +1417,39 @@ class MusicService : MediaLibraryService() {
                 }
             }
             replayGainProcessor.apply(mediaSession?.player?.currentMediaItem)
+
+            val currentSongId = mediaItem?.mediaId
+            if (!currentSongId.isNullOrBlank()) {
+                // Auto-skip tracks that are marked as ignored in playback during auto transitions
+                if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO || reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK) {
+                    serviceScope.launch {
+                        val ignoredIds = userPreferencesRepository.playbackIgnoredSongIdsFlow.first()
+                        if (currentSongId in ignoredIds) {
+                            withContext(Dispatchers.Main) {
+                                val p = engine.masterPlayer
+                                if (p.hasNextMediaItem()) {
+                                    Timber.tag(TAG).d("Auto-skipping playback-ignored song: $currentSongId")
+                                    p.seekToNextMediaItem()
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Apply per-track custom playback speed (if set)
+                serviceScope.launch {
+                    val speeds = userPreferencesRepository.songPlaybackSpeedsFlow.first()
+                    val targetSpeed = speeds[currentSongId] ?: 1.0f
+                    withContext(Dispatchers.Main) {
+                        val p = engine.masterPlayer
+                        if (kotlin.math.abs(p.playbackParameters.speed - targetSpeed) > 0.01f) {
+                            Timber.tag(TAG).d("Applying custom speed $targetSpeed for song $currentSongId")
+                            p.playbackParameters = PlaybackParameters(targetSpeed, 1.0f)
+                        }
+                    }
+                }
+            }
+
             // Pre-fetch RG for the track after this one so it's cached when needed
             val player = engine.masterPlayer
             val nextIndex = player.nextMediaItemIndex

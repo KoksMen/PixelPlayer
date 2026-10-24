@@ -100,6 +100,9 @@ class UserPreferencesRepository @Inject constructor(
         val ALBUM_ART_PALETTE_STYLE = stringPreferencesKey("album_art_palette_style_v1")
         val APP_THEME_MODE = stringPreferencesKey("app_theme_mode")
         val FAVORITE_SONG_IDS = stringSetPreferencesKey("favorite_song_ids")
+        val HIDDEN_SONG_IDS = stringSetPreferencesKey("hidden_song_ids")
+        val PLAYBACK_IGNORED_SONG_IDS = stringSetPreferencesKey("playback_ignored_song_ids")
+        val SONG_PLAYBACK_SPEEDS = stringPreferencesKey("song_playback_speeds_json")
         val USER_PLAYLISTS = stringPreferencesKey("user_playlists_json_v1")
         val PLAYLIST_SONG_ORDER_MODES = stringPreferencesKey("playlist_song_order_modes")
 
@@ -535,6 +538,56 @@ class UserPreferencesRepository @Inject constructor(
 
     suspend fun clearFavoriteSongIds() {
         dataStore.edit { it[PreferencesKeys.FAVORITE_SONG_IDS] = emptySet() }
+    }
+
+    // ─── Hidden and Playback Ignored Songs & Custom Speeds ─────────────────────
+
+    val hiddenSongIdsFlow: Flow<Set<String>> =
+        pref { it[PreferencesKeys.HIDDEN_SONG_IDS] ?: emptySet() }
+
+    suspend fun setSongHidden(songId: String, isHidden: Boolean) {
+        dataStore.edit { preferences ->
+            val current = preferences[PreferencesKeys.HIDDEN_SONG_IDS] ?: emptySet()
+            preferences[PreferencesKeys.HIDDEN_SONG_IDS] =
+                if (isHidden) current + songId else current - songId
+        }
+    }
+
+    suspend fun unhideAllSongs() {
+        dataStore.edit { it[PreferencesKeys.HIDDEN_SONG_IDS] = emptySet() }
+    }
+
+    val playbackIgnoredSongIdsFlow: Flow<Set<String>> =
+        pref { it[PreferencesKeys.PLAYBACK_IGNORED_SONG_IDS] ?: emptySet() }
+
+    suspend fun setSongPlaybackIgnored(songId: String, isIgnored: Boolean) {
+        dataStore.edit { preferences ->
+            val current = preferences[PreferencesKeys.PLAYBACK_IGNORED_SONG_IDS] ?: emptySet()
+            preferences[PreferencesKeys.PLAYBACK_IGNORED_SONG_IDS] =
+                if (isIgnored) current + songId else current - songId
+        }
+    }
+
+    suspend fun clearPlaybackIgnoredSongIds() {
+        dataStore.edit { it[PreferencesKeys.PLAYBACK_IGNORED_SONG_IDS] = emptySet() }
+    }
+
+    val songPlaybackSpeedsFlow: Flow<Map<String, Float>> =
+        pref { preferences ->
+            decodeJsonPref(preferences, PreferencesKeys.SONG_PLAYBACK_SPEEDS, emptyMap())
+        }
+
+    suspend fun setSongPlaybackSpeed(songId: String, speed: Float?) {
+        if (speed == null || speed == 1.0f) {
+            editJsonMap<Float>(PreferencesKeys.SONG_PLAYBACK_SPEEDS) { remove(songId) }
+        } else {
+            editJsonMap<Float>(PreferencesKeys.SONG_PLAYBACK_SPEEDS) { put(songId, speed) }
+        }
+    }
+
+    suspend fun getSongPlaybackSpeed(songId: String): Float? {
+        val map = songPlaybackSpeedsFlow.first()
+        return map[songId]
     }
 
     // ─── Playlists ────────────────────────────────────────────────────────────

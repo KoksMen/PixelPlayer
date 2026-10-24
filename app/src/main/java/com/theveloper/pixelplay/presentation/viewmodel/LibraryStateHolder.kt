@@ -4,6 +4,7 @@ import android.content.ComponentCallbacks2
 import android.os.Trace
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import androidx.compose.ui.graphics.toArgb
@@ -256,10 +257,15 @@ class LibraryStateHolder @Inject constructor(
 
         songsJob = scope?.launch {
             _isLoadingLibrary.value = true
-            musicRepository.getAudioFiles().conflate().collect { songs ->
+            combine(
+                musicRepository.getAudioFiles().conflate(),
+                userPreferencesRepository.hiddenSongIdsFlow
+            ) { songs, hiddenIds ->
+                if (hiddenIds.isEmpty()) songs else songs.filterNot { it.id in hiddenIds }
+            }.collect { visibleSongs ->
                 // Process heavy list conversions on Default dispatcher to avoid blocking UI
-                val immutableSongs = withContext(Dispatchers.Default) { songs.toImmutableList() }
-                val songsMap = withContext(Dispatchers.Default) { songs.associateBy { it.id } }
+                val immutableSongs = withContext(Dispatchers.Default) { visibleSongs.toImmutableList() }
+                val songsMap = withContext(Dispatchers.Default) { visibleSongs.associateBy { it.id } }
 
                 _allSongs.value = immutableSongs
                 _allSongsById.value = songsMap

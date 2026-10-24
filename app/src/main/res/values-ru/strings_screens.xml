@@ -25,7 +25,7 @@
     <string name="setup_inspecting_backup">Проверка резервной копии</string>
     <string name="setup_checking_backup">Проверка пакета резервной копии…</string>
     <string name="setup_restoring_backup">Восстановление резервной копии</string>
-    <string name="setup_skip_for_now">Пропустить / Пока нет</string>
+    <string name="setup_skip_for_now">Пропустить</string>
     <string name="setup_restore_backup_title">Восстановление резервной копии</string>
     <string name="setup_restore_backup_subtitle">Проверьте, что хотите импортировать, перед завершением настройки.</string>
     <string name="setup_modules_selected_format">%1$d из %2$d модулей выбрано</string>
@@ -56,7 +56,7 @@
     <string name="setup_compact_mode_tab_hint">Стандартные вкладки</string>
     <string name="setup_tab_songs">ТРЕКИ</string>
     <string name="setup_tab_albums">АЛЬБОМЫ</string>
-    <string name="setup_tab_artists">ИСПОЛНИТЕЛИ</string>
+    <string name="setup_tab_artists">АРТИСТЫ</string>
     <string name="setup_library_layout_footer">Позже это можно изменить в Настройки &gt; Внешний вид &gt; Навигация по медиатеке.</string>
     <string name="setup_app_navigation_title">Навигация приложения</string>
     <string name="setup_app_navigation_subtitle">Выберите стиль нижней панели навигации.</string>
@@ -117,14 +117,14 @@
     <string name="playlist_dialog_delete_title">Удалить плейлист?</string>
     <string name="playlist_dialog_delete_body">Вы уверены, что хотите удалить этот плейлист?</string>
     <string name="playlist_action_set_default_transition">Установить переход по умолчанию</string>
-    <string name="playlist_action_export_playlist">Экспортировать плейлист</string>
+    <string name="playlist_action_export_playlist">Экспорт</string>
     <string name="playlist_song_duration_line">%1$s • %2$s</string>
-    <string name="playlist_action_play_it">Воспроизвести</string>
+    <string name="playlist_action_play_it">Играть</string>
     <string name="playlist_action_add_songs">Добавить</string>
     <string name="playlist_cd_add_songs">Добавить треки</string>
     <string name="playlist_action_remove_songs">Удалить</string>
     <string name="playlist_cd_remove_songs">Удалить треки</string>
-    <string name="playlist_action_reorder_songs">Изменить порядок</string>
+    <string name="playlist_action_reorder_songs">Порядок</string>
     <string name="playlist_cd_reorder_songs">Изменить порядок треков</string>
 
     <!-- EditTransitionScreen -->

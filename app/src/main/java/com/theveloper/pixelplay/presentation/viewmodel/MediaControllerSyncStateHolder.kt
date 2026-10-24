@@ -7,6 +7,7 @@ import androidx.core.net.toUri
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.Tracks
@@ -19,6 +20,7 @@ import com.theveloper.pixelplay.data.model.Song
 import com.theveloper.pixelplay.data.preferences.UserPreferencesRepository
 import com.theveloper.pixelplay.data.repository.MusicRepository
 import com.theveloper.pixelplay.data.service.player.DualPlayerEngine
+import com.theveloper.pixelplay.utils.LyricsUtils
 import com.theveloper.pixelplay.utils.MediaItemBuilder
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ViewModelScoped
@@ -426,29 +428,34 @@ class MediaControllerSyncStateHolder @Inject constructor(
         } else {
             0L
         }
-
-        playbackStateHolder.updateStablePlayerState {
-            it.copy(
-                currentSong = song,
-                currentMediaItemIndex = expectedIndex,
-                totalDuration = resolvedDuration,
-                lyrics = null,
-                isLoadingLyrics = song != null,
-                isPlaying = player.isPlaying,
-                playWhenReady = player.playWhenReady
-            )
-        }
-        syncPlaybackPositionFromPlayer(mediaItem.mediaId, currentPosition)
-
-        song?.let { currentSongValue ->
-            cb.scope.launch {
-                val uri = currentSongValue.albumArtUriString?.toUri()
-                val currentUri = playbackStateHolder.stablePlayerState.value.currentSong?.albumArtUriString
-                themeStateHolder.extractAndGenerateColorScheme(uri, currentUri)
-            }
-            cb.loadLyricsForCurrentSong()
-        }
-    }
+ 
+         val initialLyrics = song?.lyrics?.takeIf { it.isNotBlank() }?.let { raw ->
+             LyricsUtils.parseLyrics(raw).takeIf { it.isValid() }
+         }
+         playbackStateHolder.updateStablePlayerState {
+             it.copy(
+                 currentSong = song,
+                 currentMediaItemIndex = expectedIndex,
+                 totalDuration = resolvedDuration,
+                 lyrics = initialLyrics,
+                 isLoadingLyrics = song != null && initialLyrics == null,
+                 isPlaying = player.isPlaying,
+                 playWhenReady = player.playWhenReady
+             )
+         }
+         syncPlaybackPositionFromPlayer(mediaItem.mediaId, currentPosition)
+ 
+         song?.let { currentSongValue ->
+             cb.scope.launch {
+                 val uri = currentSongValue.albumArtUriString?.toUri()
+                 val currentUri = playbackStateHolder.stablePlayerState.value.currentSong?.albumArtUriString
+                 themeStateHolder.extractAndGenerateColorScheme(uri, currentUri)
+             }
+             if (initialLyrics == null) {
+                 cb.loadLyricsForCurrentSong()
+             }
+         }
+     }
 
     /**
      * Wires the [MediaController] into the playback UI state. Decomposed from a single
@@ -606,6 +613,11 @@ class MediaControllerSyncStateHolder @Inject constructor(
                         playbackStateHolder.updateStablePlayerState { state ->
                             state.copy(isBuffering = true)
                         }
+                        // Safety timeout: auto-clear buffering indicator after 8s if player stalls
+                        delay(8000)
+                        playbackStateHolder.updateStablePlayerState { state ->
+                            state.copy(isBuffering = false)
+                        }
                     }
                 } else {
                     // Immediately hide buffering when not buffering
@@ -646,6 +658,15 @@ class MediaControllerSyncStateHolder @Inject constructor(
                         resetPlaybackAudioMetadata()
                     }
                 }
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                bufferingDebounceJob?.cancel()
+                playbackStateHolder.updateStablePlayerState { state ->
+                    state.copy(isBuffering = false, isPlaying = false, playWhenReady = false)
+                }
+                playbackDispatchStateHolder.clearPreparingSongIfMatching()
+                lyricsStateHolder.cancelLoading()
             }
         })
     }
@@ -709,6 +730,9 @@ class MediaControllerSyncStateHolder @Inject constructor(
                             0L
                         }
                         cb.resetLyricsSearchState()
+                        val initialLyrics = song?.lyrics?.takeIf { it.isNotBlank() }?.let { raw ->
+                            LyricsUtils.parseLyrics(raw).takeIf { it.isValid() }
+                        }
                         playbackStateHolder.updateStablePlayerState {
                             it.copy(
                                 currentSong = song,
@@ -718,8 +742,8 @@ class MediaControllerSyncStateHolder @Inject constructor(
                                     playerCtrl.currentMediaItemIndex
                                 },
                                 totalDuration = resolvedDuration,
-                                lyrics = null,
-                                isLoadingLyrics = song != null,
+                                lyrics = initialLyrics,
+                                isLoadingLyrics = song != null && initialLyrics == null,
                                 playWhenReady = playerCtrl.playWhenReady
                             )
                         }
@@ -734,7 +758,9 @@ class MediaControllerSyncStateHolder @Inject constructor(
                                 val currentUri = playbackStateHolder.stablePlayerState.value.currentSong?.albumArtUriString
                                 themeStateHolder.extractAndGenerateColorScheme(uri, currentUri)
                             }
-                            cb.loadLyricsForCurrentSong()
+                            if (initialLyrics == null) {
+                                cb.loadLyricsForCurrentSong()
+                            }
                         }
                     } ?: run {
                         if (!castStateHolder.isCastConnecting.value && !castStateHolder.isRemotePlaybackActive.value) {

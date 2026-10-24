@@ -73,6 +73,8 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.Style
 import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.BlurOff
 import androidx.compose.material.icons.rounded.Check
@@ -83,6 +85,7 @@ import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.Science
+import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material.icons.rounded.UnfoldMore
@@ -226,10 +229,14 @@ fun SettingsCategoryScreen(
     val syncProgress by settingsViewModel.syncProgress.collectAsStateWithLifecycle()
     val dataTransferProgress by settingsViewModel.dataTransferProgress.collectAsStateWithLifecycle()
     val paletteRegenerateTargets by playerViewModel.paletteRegenerationTargets.collectAsStateWithLifecycle()
+    val hiddenSongs by settingsViewModel.hiddenSongs.collectAsStateWithLifecycle()
+    val playbackIgnoredSongs by settingsViewModel.playbackIgnoredSongs.collectAsStateWithLifecycle()
     val explorerRoot = settingsViewModel.explorerRoot()
 
     // Local State
     var showExplorerSheet by remember { mutableStateOf(false) }
+    var showHiddenSongsDialog by remember { mutableStateOf(false) }
+    var showIgnoredSongsDialog by remember { mutableStateOf(false) }
     var refreshRequested by remember { mutableStateOf(false) }
     var syncRequestObservedRunning by remember { mutableStateOf(false) }
     var syncIndicatorLabel by remember { mutableStateOf<String?>(null) }
@@ -433,6 +440,20 @@ fun SettingsCategoryScreen(
                                     leadingIcon = { Icon(Icons.Outlined.Person, null, tint = MaterialTheme.colorScheme.secondary) },
                                     trailingIcon = { Icon(Icons.Rounded.ChevronRight, stringResource(R.string.settings_cd_open), tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                                     onClick = { navController.navigateSafely(Screen.ArtistSettings.route) }
+                                )
+                                SettingsItem(
+                                    title = stringResource(R.string.settings_hidden_songs_title),
+                                    subtitle = stringResource(R.string.settings_hidden_songs_subtitle),
+                                    leadingIcon = { Icon(Icons.Outlined.VisibilityOff, null, tint = MaterialTheme.colorScheme.secondary) },
+                                    trailingIcon = { Icon(Icons.Rounded.ChevronRight, stringResource(R.string.settings_cd_open), tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                                    onClick = { showHiddenSongsDialog = true }
+                                )
+                                SettingsItem(
+                                    title = stringResource(R.string.settings_ignored_songs_title),
+                                    subtitle = stringResource(R.string.settings_ignored_songs_subtitle),
+                                    leadingIcon = { Icon(Icons.Outlined.SkipNext, null, tint = MaterialTheme.colorScheme.secondary) },
+                                    trailingIcon = { Icon(Icons.Rounded.ChevronRight, stringResource(R.string.settings_cd_open), tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                                    onClick = { showIgnoredSongsDialog = true }
                                 )
                             }
 
@@ -1476,6 +1497,24 @@ fun SettingsCategoryScreen(
             showExplorerSheet = false
         }
     )
+
+    if (showHiddenSongsDialog) {
+        HiddenSongsDialog(
+            songs = hiddenSongs,
+            onDismiss = { showHiddenSongsDialog = false },
+            onUnhide = { songId -> settingsViewModel.unhideSong(songId) },
+            onUnhideAll = { settingsViewModel.unhideAllSongs() }
+        )
+    }
+
+    if (showIgnoredSongsDialog) {
+        IgnoredSongsDialog(
+            songs = playbackIgnoredSongs,
+            onDismiss = { showIgnoredSongsDialog = false },
+            onRemove = { songId -> settingsViewModel.setSongPlaybackIgnored(songId, false) },
+            onClearAll = { settingsViewModel.clearPlaybackIgnoredSongs() }
+        )
+    }
 
     if (showPaletteRegenerateSheet) {
         ModalBottomSheet(
@@ -2927,3 +2966,186 @@ private fun SettingsSubsection(
         Spacer(modifier = Modifier.height(10.dp))
     }
 }
+
+@Composable
+private fun HiddenSongsDialog(
+    songs: List<Song>,
+    onDismiss: () -> Unit,
+    onUnhide: (String) -> Unit,
+    onUnhideAll: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.settings_hidden_songs_title),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        text = {
+            if (songs.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.settings_hidden_songs_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 350.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    items(songs, key = { it.id }) { song ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = song.title,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = song.displayArtist,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            IconButton(onClick = { onUnhide(song.id) }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Visibility,
+                                    contentDescription = stringResource(R.string.song_info_action_unhide),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = stringResource(R.string.common_close),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        },
+        dismissButton = if (songs.isNotEmpty()) {
+            {
+                TextButton(onClick = onUnhideAll) {
+                    Text(
+                        text = stringResource(R.string.settings_hidden_songs_unhide_all),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        } else null
+    )
+}
+
+@Composable
+private fun IgnoredSongsDialog(
+    songs: List<Song>,
+    onDismiss: () -> Unit,
+    onRemove: (String) -> Unit,
+    onClearAll: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.settings_ignored_songs_title),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        text = {
+            if (songs.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.settings_ignored_songs_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 350.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    items(songs, key = { it.id }) { song ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = song.title,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = song.displayArtist,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            IconButton(onClick = { onRemove(song.id) }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Delete,
+                                    contentDescription = stringResource(R.string.common_delete),
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = stringResource(R.string.common_close),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        },
+        dismissButton = if (songs.isNotEmpty()) {
+            {
+                TextButton(onClick = onClearAll) {
+                    Text(
+                        text = stringResource(R.string.settings_ignored_songs_clear_all),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        } else null
+    )
+}
+

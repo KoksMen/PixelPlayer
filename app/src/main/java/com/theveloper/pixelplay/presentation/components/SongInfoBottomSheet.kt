@@ -57,6 +57,10 @@ import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material.icons.rounded.ContentCut
+import androidx.compose.material.icons.rounded.SkipNext
+import androidx.compose.material.icons.rounded.Speed
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -155,6 +159,13 @@ fun SongInfoBottomSheet(
     var toneConfirmationTarget by remember { mutableStateOf<ToneTarget?>(null) }
     var pendingTonePermissionSong by remember { mutableStateOf<Song?>(null) }
     var pendingTonePermissionTarget by remember { mutableStateOf<ToneTarget?>(null) }
+    val hiddenSongIds by songInfoViewModel.hiddenSongIds.collectAsStateWithLifecycle()
+    val playbackIgnoredSongIds by songInfoViewModel.playbackIgnoredSongIds.collectAsStateWithLifecycle()
+    val songPlaybackSpeeds by songInfoViewModel.songPlaybackSpeeds.collectAsStateWithLifecycle()
+    val isPlaybackIgnored = remember(song.id, playbackIgnoredSongIds) { playbackIgnoredSongIds.contains(song.id) }
+    val currentSongSpeed = remember(song.id, songPlaybackSpeeds) { songPlaybackSpeeds[song.id] ?: 1.0f }
+    var showTrimDialog by remember { mutableStateOf(false) }
+    var isTrimmingAudio by remember { mutableStateOf(false) }
     val audioMeta by songInfoViewModel.audioMeta.collectAsStateWithLifecycle()
     val resolvedArtists by songInfoViewModel.resolvedArtists.collectAsStateWithLifecycle()
     val isPixelPlayWatchAvailable by songInfoViewModel.isPixelPlayWatchAvailable.collectAsStateWithLifecycle()
@@ -576,6 +587,35 @@ fun SongInfoBottomSheet(
                                             )
                                         }
 
+                                        TrackSpeedSection(
+                                            currentSpeed = currentSongSpeed,
+                                            onSpeedSelected = { speed ->
+                                                songInfoViewModel.setSongPlaybackSpeed(song.id, if (speed == 1.0f) null else speed)
+                                            }
+                                        )
+
+                                        RowPlaybackAndVisibilityActions(
+                                            isIgnored = isPlaybackIgnored,
+                                            onToggleIgnore = {
+                                                songInfoViewModel.setSongPlaybackIgnored(song.id, !isPlaybackIgnored)
+                                            },
+                                            onHideSong = {
+                                                songInfoViewModel.setSongHidden(song.id, true)
+                                                Toast.makeText(context, context.getString(R.string.song_hidden_toast), Toast.LENGTH_SHORT).show()
+                                                removeFromListTrigger()
+                                                onDismiss()
+                                            }
+                                        )
+
+                                        val canTrimAudio = remember(song.path, song.contentUriString) {
+                                            songInfoViewModel.isLocalSongForWatchTransfer(song)
+                                        }
+                                        if (canTrimAudio) {
+                                            TrimActionButton(
+                                                onClick = { showTrimDialog = true }
+                                            )
+                                        }
+
                                         Spacer(Modifier.height(80.dp))
                                     }
                                 }
@@ -800,6 +840,27 @@ fun SongInfoBottomSheet(
             onConfirm = {
                 toneConfirmationTarget = null
                 setCurrentSongAsTone(target)
+            }
+        )
+    }
+
+    if (showTrimDialog) {
+        AudioTrimDialog(
+            song = song,
+            isTrimming = isTrimmingAudio,
+            onDismiss = { showTrimDialog = false },
+            onConfirm = { startMs, endMs, asRingtone ->
+                isTrimmingAudio = true
+                songInfoViewModel.trimSong(song, startMs, endMs, asRingtone) { result ->
+                    isTrimmingAudio = false
+                    showTrimDialog = false
+                    if (result.isSuccess) {
+                        Toast.makeText(context, context.getString(R.string.trim_audio_success), Toast.LENGTH_LONG).show()
+                    } else {
+                        val errorMsg = result.exceptionOrNull()?.localizedMessage ?: "Unknown error"
+                        Toast.makeText(context, context.getString(R.string.trim_audio_error, errorMsg), Toast.LENGTH_LONG).show()
+                    }
+                }
             }
         )
     }
@@ -1794,4 +1855,206 @@ private fun Row4Actions(
         }
     }
 }
+
+@Composable
+private fun TrackSpeedSection(
+    currentSpeed: Float,
+    onSpeedSelected: (Float) -> Unit
+) {
+    val speeds = listOf(0.75f, 1.0f, 1.25f, 1.5f, 2.0f)
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f, fill = false),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Speed,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = stringResource(R.string.song_info_action_speed),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                val currentSpeedLabel = if (currentSpeed == currentSpeed.toInt().toFloat()) "${currentSpeed.toInt()}x" else "${currentSpeed}x"
+                Text(
+                    text = currentSpeedLabel,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                speeds.forEach { speed ->
+                    val isSelected = kotlin.math.abs(currentSpeed - speed) < 0.01f
+                    val containerColor by animateColorAsState(
+                        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
+                        label = "SpeedChipBg"
+                    )
+                    val contentColor by animateColorAsState(
+                        targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        label = "SpeedChipFg"
+                    )
+                    Surface(
+                        onClick = { onSpeedSelected(speed) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(36.dp),
+                        shape = CircleShape,
+                        color = containerColor,
+                        contentColor = contentColor,
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val label = if (speed == speed.toInt().toFloat()) "${speed.toInt()}x" else "${speed}x"
+                            Text(
+                                text = label,
+                                fontSize = 12.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RowPlaybackAndVisibilityActions(
+    isIgnored: Boolean,
+    onToggleIgnore: () -> Unit,
+    onHideSong: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        val ignoreContainerColor by animateColorAsState(
+            targetValue = if (isIgnored) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+            label = "IgnoreContainerColor"
+        )
+        val ignoreContentColor by animateColorAsState(
+            targetValue = if (isIgnored) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+            label = "IgnoreContentColor"
+        )
+
+        FilledTonalButton(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = ignoreContainerColor,
+                contentColor = ignoreContentColor
+            ),
+            contentPadding = PaddingValues(horizontal = 12.dp),
+            shape = CircleShape,
+            onClick = onToggleIgnore
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.SkipNext,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = stringResource(R.string.song_info_action_playback_ignore),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+
+        FilledTonalButton(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            contentPadding = PaddingValues(horizontal = 12.dp),
+            shape = CircleShape,
+            onClick = onHideSong
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.VisibilityOff,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = stringResource(R.string.song_info_action_hide),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@Composable
+private fun TrimActionButton(
+    onClick: () -> Unit
+) {
+    FilledTonalButton(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp),
+        colors = ButtonDefaults.filledTonalButtonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        shape = CircleShape,
+        onClick = onClick
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.ContentCut,
+            contentDescription = null,
+            modifier = Modifier.size(22.dp)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = stringResource(R.string.song_info_action_trim),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
 
